@@ -2,5 +2,4 @@
 
 *Strumenti e linguaggi utilizzati:*
 
-  - *NodeJS*
-  - *TypeScript*
+  - *NodeJS (JavaScript & TypeScript)*
