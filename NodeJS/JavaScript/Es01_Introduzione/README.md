@@ -1,48 +1,18 @@
-3. > **LEZIONE 1**
-     3. > *Consegna Node - Ese 3 Ombrelloni*
-     
-## Obiettivo
-Si vuole realizzare una applicazione per la prenotazione degli ombrelloni sullo stabilimento Balneare n. 6 di **Lignano Sabbiadoro** contenente 666 ombrelloni numerati a 1 a 666
-e disposti per file. Ogni ombrellone potrà essere prenotato nel periodo tra il 1 giugno e il 15 settembre. Il numero massimo di giorni di prenotazione potrà essere 107 (intera stagione).
-I due text di impostazione delle date sono già settati da html all’interno di questo range. Le file sono complessivamente 9 + 9 = 18, Dopo la 9° file c’è una posizione vuota per
-il passaggio. Ogni fila contiene 22 + 15 ombrelloni = 37. Dopo il 22° c’è una posizione vuota per il passaggio. Gli ombrelloni complessivamente sono quindi 37 x 18 = 666. 
-Sulla mappa gli ombrelloni hanno diametro 9px ed una distanza fra i baricentri pari a 16px. Man mano che si avanza nelle file, le nuove file partono ogni volta 2 pixel più a sinistra.
-L’ ombrellone n. 1 (il primo in alto a sinistra) ha posizione X=180, Y=210
+# Es01_Introduzione
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Node.js_logo.svg/1200px-Node.js_logo.svg.png" alt="NodeJS" style="height: 30px;"><img src="https://upload.wikimedia.org/wikipedia/commons/7/73/Javascript-736400_960_720.png" alt="JavaScript" style="height: 30px;">
 
-## All'avvio
-- La mappa è nascosta mentre textBox di fine soggiorno e pulsante “scegli ombrellone” sono disabilitati. 
-- Il pulsante “scegli ombrellone” implementa la classe button, mentre la classe buttonEnabled sarà applicata dinamicamente al momento dell’abilitazione del pulsante.
-- In corrispondenza della scelta della data di inizio soggiorno viene abilitato il text box relativo alla data di fine soggiorno impostando anche come valor minimo di selezione la
-  data di inizio soggiorno.
-- In corrispondenza della scelta della data di fine soggiorno viene visualizzato un messaggio contenente il numero di giorni impostato e viene abilitato il pulsante “scegli ombrellone”.
+L'obiettivo del progetto è quello di realizzare un server che, alla richiesta dal client, al client una pagina HTML contenente le tre informazioni ricevute in fase di richiesta:
+ - Risorsa richiesta;
+ - Dominio del web server;
+ - Metodo di chiamata;
+ - Parametri della chiamata.
 
-## Base Dati
-- Come base dati si utilizza il json allegato gestito mediante un json-server in cui, per ogni ombrellone, è riportato un ID (inutile, in quanto l’ID è sempre +1 rispetto alla
-posizione del record nel vettore) ed un vettore di 107 numeri interi ognuno riferito ad uno dei 107 giorni compresi tra il 1/6 ed il 15/9. Questi numeri indicano le prenotazioni di quel singolo ombrellone in ciascun giorno, dove:
-- 0 significa ombrellone libero
-- !=0 indica l’ID del cliente che ha prenotato l’ombrellone nel giorno corrispondente.
-- E’ allegata una semplice utility che crea questo json impostando tutti gli ombrelloni come sempre liberi.
+Il progetto NodeJS si basa sul metodo, della libreria nativa **http**, **createServer()** che crea e restituisce un server HTTP. L'unico parametro della funzione è una funzione di callback gestita dal programmatore, che verrà eseguita ogni volta che il server riceverà una richiesta. In corrispondenza di ogni richiesta, alla funzione di callback verranno automaticamente iniettati due parametri:
+ - **Request**, un oggetto di tipo IncomingMessage all'interno del quale sono contenute tutte le informazioni relative alla richiesta del client;
+ - **Response**, un oggetto di tipo ServerResponse all'interno del quale il server scriverà la risposta da inviare al client;  
 
-## In corrispondenza del click sul pulsante “scegli ombrellone”
-- L’applicazione invia una richiesta Ajax al json-server richiedendo lo stato aggiornato delle prenotazioni di tutti gli ombrelloni. 
-- Ricevuta la risposta, l’applicazione visualizza la mappa e scorre il vettore degli ombrelloni, visualizzando in verde gli ombrelloni che sono liberi in tutti i giorni scelti 
-  dall’utente e visualizzando in rosso gli ombrelloni già prenotati in uno o più giorni fra quelli scelti dall’utente.
-- Gli ombrelloni rossi sono insensibili al click.
-
-## Click su un ombrellone verde
-- L’ombrellone diventa blu. In corrispondenza di un eventuale successivo click, ritorna verde.
-- L’utente, nel periodo selezionato, può prenotare anche più ombrelloni. Ogni ombrellone selezionato viene aggiunto all’interno di un apposito vettore.
-
-## Click sul pulsante PRENOTA
-- In basso a destra, in corrispondenza della visualizzazione della mappa, viene creato all’interno della mappa un pulsante “prenota” sotto forma di tag <a> che, in corrispondenza
-  del click, salverà l’intera struttura dati sul file ombrelloni.json . Il pulsante “prenota” implementa le classi button, buttonEnabled e prenota.
-- In corrispondenza del click scorre il vettore delle prenotazioni e aggiorna la struttura json impostando, nel vettore di stato degli ombrelloni selezionati, il codice dell’utente
-  attuale relativamente a tutti i giorni selezionati (impostare provvisoriamente il codice 1). Quindi salva la struttura dati su disco ed esegue il refresh della pagina per la
-  gestione di una nuova prenotazione.
-  
-## Login
-- Aggiungere all’interno della stessa pagina (single-page) una sezione iniziale di login. All’avvio il precedente wrapper principale sarà nascosto ed al suo posto comparirà un 
-  wrapper di login in cui l’utente dovrà inserire le proprie credenziali.
-- In corrispondenza del click sul pulsante INVIA il client, tramite una chiamata ajax, richiede al server l’elenco degli utenti registrati. Verifica quindi le credenziali.
-- In caso di credenziali non valide visualizza una label di errore e, dopo 1 sec, esegue il refresh della pag.
-- In caso di credenziali valide nasconde il wrapper di login e visualizza il precedente wrapper principale.
+NB: Per avviare il server occorre aprire un terminale sulla directory contenente il server ed eseguire il comando:
+```bash
+node [server].js
+```
+Per provare effettivamente il funzionamento del server occorre aprire un browser e digitare localhost:[porta], oppure, se non lo si è impostato in loopback, digitare l'indirizzo IP della macchina host e :[porta].
