@@ -8,7 +8,7 @@
 
 *NB: Seguire i seguenti passaggi per eseguire correttamente tutti i progetti sulla propria macchina:*
   - *Scaricare ed installare la versione 14.17.6 di NodeJS (https://nodejs.org/it/download/);*
-  - *Impostare, nelle variabili d'ambiente dell'utente, una variabile "NODE_PATH" con valore il percorso dei pacchetti npm globali, che per default è C:\Users\%username%\AppData\Roaming\npm\node_modules;*
+  - *Impostare, nelle variabili d'ambiente dell'utente, una variabile "NODE_PATH" con valore il percorso dei pacchetti npm globali, che per default è C:\Users\\%username%\AppData\Roaming\npm\node_modules;*
   - *Installare, tramite console, le seguenti librerie npm: colors e mime (per i progetti JavaScript), nodemon (per eseguire l'host su rete senza dover riavviare il server ad ogni modifica), ts-node e typescript (per la compilazione dei progetti TypeScript). Eseguibile anche tramite il seguente comando:*
 ```bash
 npm install -g colors mime nodemon ts-node typescript
