@@ -16,6 +16,8 @@ let server = http.createServer((req:any, res:any) => {
 
 server.listen(PORT);
 
+
+
 console.log("Server in ascolto sulla porta " + PORT);
 
 // ======= registrazione dei servizi =======
@@ -23,5 +25,13 @@ dispatcher.addListener("POST", "/api/servizio1", (req, res) => {
     res.writeHead(200, HEADER.json);
     res.end(JSON.stringify({
         "ris": "ok"
+    }));
+});
+
+dispatcher.addListener("GET", "/api/servizio2", (req, res) => {
+    res.writeHead(200, HEADER.json);
+    let nome = req["GET"].nome;
+    res.end(JSON.stringify({
+        "ris": nome
     }));
 });

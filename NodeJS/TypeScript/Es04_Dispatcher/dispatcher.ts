@@ -1,22 +1,12 @@
 import * as http from "http";
-<<<<<<< HEAD
 import * as _url from "url";
 import * as fs from "fs";
 import * as mime from "mime";
-import { inherits } from "util";
+import * as querystring from "query-string";
 
 // non abbiamo il wrapper per questo piccolo json
 // quindi lo dobbiamo richiamare tramite require
 let HEADERS = require("./headers.json");
-=======
-import * as url from "url";
-import * as fs from "fs";
-import * as mime from "mime";
-
-// non abbiamo il wrapper per questo piccolo json
-// quindi lo dobbiamo richiamare tramite require
-let HEADERS = require("/headers.json");
->>>>>>> ff83700c25cd62334609fde367533e9e36db0c18
 
 let paginaErrore:string;
 
@@ -45,11 +35,7 @@ class Dispatcher {
         }
     }
     constructor() {
-<<<<<<< HEAD
         init();
-=======
-
->>>>>>> ff83700c25cd62334609fde367533e9e36db0c18
     }
     // ogni volta che dal main vorremo aggiungere un listener
     // richiamiamo questo metodo, che andrà a registrare questo metodo
@@ -69,27 +55,53 @@ class Dispatcher {
             throw new Error ("metodo non valido");
         }
     }
-<<<<<<< HEAD
     dispatch(req, res) {
-        let metodo = req.method;
-        let url = _url.parse(req.url, true);
-        let risorsa = url.pathname;
-        let parametri = url.query;
-
-        console.log(`${this.prompt} ${metodo}:${risorsa} ${JSON.stringify(parametri)}`);
-
-        if (risorsa.startsWith("/api/")) {
-            if (risorsa in this.listeners[metodo]) {
-                let callback = this.listeners[metodo][risorsa];
-                // lancio in esecuzione la callback
-                callback(req, res);
-            } else {
-                res.writeHead(404, HEADERS.text);
-                res.end("Servizio non trovato");
-            }
+        let metodo = req.method.toUpperCase();
+        if (metodo = "GET") {
+            innerDispatch(req, res);
         } else {
-            staticListener(req, res, risorsa);
+            let parametriBody:string = "";
+            // evento che viene chiamato ogni
+            // volta che arriva una porzione di dati
+            req.on("data", function(data) {
+                parametriBody += data;
+            });
+            let parametriJSON = {};
+            req.on("end", function() {
+                try {
+                    // se i parametri sono in formato json la
+                    // conversione va a buon fine
+                    parametriJSON = JSON.parse(parametriBody);
+                } catch (error) {
+                    // altrimenti significa che sono URL_ENCODED
+                    parametriJSON = querystring.parse(parametriBody);
+                }
+            });
         }
+    }
+}
+
+let innerDispatch = (req, res) => {
+    let metodo = req.method;
+    let url = _url.parse(req.url, true);
+    let risorsa = url.pathname;
+    let parametri = url.query;
+
+    req["GET"] = parametri;
+    
+    console.log(`${this.prompt} ${metodo}:${risorsa} ${JSON.stringify(parametri)}`);
+
+    if (risorsa.startsWith("/api/")) {
+        if (risorsa in this.listeners[metodo]) {
+            let callback = this.listeners[metodo][risorsa];
+            // lancio in esecuzione la callback
+            callback(req, res);
+        } else {
+            res.writeHead(404, HEADERS.text);
+            res.end("Servizio non trovato");
+        }
+    } else {
+        staticListener(req, res, risorsa);
     }
 }
 
@@ -127,6 +139,3 @@ let init = () => {
 // dal main si importa solamente l'istanza
 // di Dispatcher perchè è l'unica che esportiamo
 module.exports = new Dispatcher();
-=======
-}
->>>>>>> ff83700c25cd62334609fde367533e9e36db0c18
