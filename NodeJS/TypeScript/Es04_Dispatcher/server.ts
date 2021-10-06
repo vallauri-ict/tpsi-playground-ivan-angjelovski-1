@@ -23,8 +23,10 @@ console.log("Server in ascolto sulla porta " + PORT);
 // ======= registrazione dei servizi =======
 dispatcher.addListener("POST", "/api/servizio1", (req, res) => {
     res.writeHead(200, HEADER.json);
+    let nome = req["BODY"].nome;
     res.end(JSON.stringify({
-        "ris": "ok"
+        "ris": nome,
+        "id": req["GET"].id
     }));
 });
 

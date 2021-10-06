@@ -2,7 +2,7 @@ import * as http from "http";
 import * as _url from "url";
 import * as fs from "fs";
 import * as mime from "mime";
-import * as querystring from "query-string";
+import * as query_string from "query-string";
 
 // non abbiamo il wrapper per questo piccolo json
 // quindi lo dobbiamo richiamare tramite require
@@ -57,8 +57,8 @@ class Dispatcher {
     }
     dispatch(req, res) {
         let metodo = req.method.toUpperCase();
-        if (metodo = "GET") {
-            innerDispatch(req, res);
+        if (metodo == "GET") {
+            this.innerDispatch(req, res);
         } else {
             let parametriBody:string = "";
             // evento che viene chiamato ogni
@@ -67,41 +67,51 @@ class Dispatcher {
                 parametriBody += data;
             });
             let parametriJSON = {};
+            let _this = this;
             req.on("end", function() {
+                // parsifico i parametri presenti nel body
                 try {
                     // se i parametri sono in formato json la
                     // conversione va a buon fine
                     parametriJSON = JSON.parse(parametriBody);
                 } catch (error) {
                     // altrimenti significa che sono URL_ENCODED
-                    parametriJSON = querystring.parse(parametriBody);
+                    parametriJSON = query_string.parse(parametriBody);
+                }
+                finally {
+                    req["BODY"] = parametriJSON;
+                    // this qui è l'oggetto request !!
+                    // this.innerDispatch(req, res);
+                    _this.innerDispatch(req, res);
                 }
             });
         }
     }
-}
-
-let innerDispatch = (req, res) => {
-    let metodo = req.method;
-    let url = _url.parse(req.url, true);
-    let risorsa = url.pathname;
-    let parametri = url.query;
-
-    req["GET"] = parametri;
+    innerDispatch(req, res) {
+        let metodo = req.method;
+        let url = _url.parse(req.url, true);
+        let risorsa = url.pathname;
+        let parametri = url.query;
     
-    console.log(`${this.prompt} ${metodo}:${risorsa} ${JSON.stringify(parametri)}`);
-
-    if (risorsa.startsWith("/api/")) {
-        if (risorsa in this.listeners[metodo]) {
-            let callback = this.listeners[metodo][risorsa];
-            // lancio in esecuzione la callback
-            callback(req, res);
-        } else {
-            res.writeHead(404, HEADERS.text);
-            res.end("Servizio non trovato");
+        req["GET"] = parametri;
+        
+        console.log(`${this.prompt} ${metodo}:${risorsa} ${JSON.stringify(parametri)}`);
+        if (req["BODY"] != null) {
+            console.log(`       ${JSON.stringify(req["BODY"])}`);
         }
-    } else {
-        staticListener(req, res, risorsa);
+    
+        if (risorsa.startsWith("/api/")) {
+            if (risorsa in this.listeners[metodo]) {
+                let callback = this.listeners[metodo][risorsa];
+                // lancio in esecuzione la callback
+                callback(req, res);
+            } else {
+                res.writeHead(404, HEADERS.text);
+                res.end("Servizio non trovato");
+            }
+        } else {
+            staticListener(req, res, risorsa);
+        }
     }
 }
 
