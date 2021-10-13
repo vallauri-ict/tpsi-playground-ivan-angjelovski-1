@@ -1,4 +1,5 @@
 "use strict"
+
 $(document).ready(function() {
     let _lstNazioni = $("#lstNazioni");
     let _tabStudenti = $("#tabStudenti");
@@ -53,7 +54,10 @@ $(document).ready(function() {
 
             // :contains pseudoselettore che punta ai button
             // che contengono Elimina al loro interno
+
+            // DELEGATE NOT WORKING
             _tabStudenti.on("click", "button:contains(Elimina)", function() {
+                console.log("click elimina");
                 let request = inviaRichiesta("DELETE", "/api/elimina", {"person": $(this).prop("name")});
                 request.fail(errore);
                 request.done(function(data) {

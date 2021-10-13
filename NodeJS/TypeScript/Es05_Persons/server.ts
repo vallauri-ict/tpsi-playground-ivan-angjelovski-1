@@ -1,8 +1,11 @@
 import * as http from "http";
 
-let HEADERS = require("./headers.json");
-let PERSONS = require("./persons.json");
-let dispatcher = require("./dispatcher.ts");
+
+import {HEADERS} from "./headers";
+import {PERSONS} from "./persons";
+import {Dispatcher} from "./dispatcher";
+
+let dispatcher:Dispatcher = new Dispatcher();
 
 const PORT:number = 1337;
 
