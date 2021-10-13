@@ -30,11 +30,14 @@ $(document).ready(function() {
         let nation = selected_nation.text();
         console.log(nation);
 
+        
+
         let request = inviaRichiesta("GET", "/api/persone", {"nazione": nation});
         request.fail(errore);
         request.done((data) => {
             console.log(data);
             _tabStudenti.empty();
+            
             _divDettagli.hide();
             for (const person of data) {
                 let tr = $("<tr>").appendTo(_tabStudenti);
