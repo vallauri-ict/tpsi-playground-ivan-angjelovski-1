@@ -1,35 +1,91 @@
-import * as _fs from "fs";
+import * as http from "http";
+import * as fs from "fs";
+
 import HEADERS from "./headers.json";
 
-// lettura file states.json
-import radios from "./radios.json";
+// due modelli di import export:
+//  - es5 (commonjs) -> require per le export
+//  - es6 -> import per le export, require() è reso disponibile grazie a types/node
 
-_fs.readFile("./states.json", (err, data) => {
-    if (err) {
-        console.error("ERROR: " + err);
-    } else {
-        // data è il contenuto del file espresso in forma binaria
-        // se il file contiene del testo è necessario fare un .toString()
-        // finale
-        // console.log(data.toString());
-        elabora(JSON.parse(data.toString()));
-    }
+import { Dispatcher } from "./dispatcher";
+
+let dispatcher:Dispatcher = new Dispatcher();
+
+const PORT:number = 1337;
+
+let server = http.createServer((req:any, res:any) => {
+    dispatcher.dispatch(req, res);
 });
 
-function elabora(states) {
-    for (const state of states) {
-        for (const radio of radios) {
-            if (radio.state == state.name) {
-                state.stationcount = parseInt(state.stationcount) + 1;
-                state.stationcount = (state.stationcount).toString();
-            }
-        }
-    }
-    _fs.writeFile("./states.json", JSON.stringify(states), (err) => {
+server.listen(PORT);
+
+
+
+console.log("Server in ascolto sulla porta " + PORT);
+
+// ======= registrazione dei servizi =======
+dispatcher.addListener("GET", "/api/elenco", (req, res) => {
+    fs.readFile("./states.json", (err, data) => {
         if (err) {
             console.error("ERROR: " + err);
         } else {
-            console.log("file salvato correttamente");
+            let regioni = [];
+            for (const item of JSON.parse(data.toString())) {
+                regioni.push(item.name);
+            }
+            res.writeHead(200, HEADERS.json);
+            res.end(JSON.stringify({
+                "regioni": regioni,
+            }));
         }
     });
-}
+});
+
+dispatcher.addListener("POST", "/api/radios", (req, res) => {
+    let param = req["BODY"].name;
+
+    fs.readFile("./radios.json", (err, data) => {
+        if (err) {
+            console.error("ERROR: " + err);
+        } else {
+            let radios = [];
+            for (const radio of JSON.parse(data.toString())) {
+                if (radio.state == param) {
+                    radios.push(radio);                    
+                }
+            }
+            res.writeHead(200, HEADERS.json);
+            res.end(JSON.stringify({
+                "radios": radios, 
+            }));
+        }
+    });
+});
+
+dispatcher.addListener("POST", "/api/like", (req, res) => {
+    let param = req["BODY"].id;
+
+    fs.readFile("./radios.json", (err, data) => {
+        if (err) {
+            console.error("ERROR: " + err);
+        } else {
+            for (const radio of JSON.parse(data.toString())) {
+                if (radio.id == param) {
+                    radio.votes = (parseInt(radio.votes) + 1).toString();                    
+                    fs.writeFile("./radios.json", JSON.stringify(JSON.parse(data.toString())), (err) => {
+                        if (err) {
+                            res.writeHead(500, HEADERS.text);
+                            res.end(JSON.stringify("File non salvato correttamente"));
+                        } else {
+                            res.writeHead(200, HEADERS.text);
+                            res.end(JSON.stringify("File salvato correttamente"));
+                        }
+                    });
+                    break;
+                }
+            }
+            res.writeHead(500, HEADERS.text);
+            res.end(JSON.stringify("Id non trovato"));
+        }
+    });
+});
