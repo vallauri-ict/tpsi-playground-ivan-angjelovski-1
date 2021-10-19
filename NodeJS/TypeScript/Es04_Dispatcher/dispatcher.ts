@@ -6,11 +6,11 @@ import * as query_string from "query-string";
 
 // non abbiamo il wrapper per questo piccolo json
 // quindi lo dobbiamo richiamare tramite require
-let HEADERS = require("./headers.json");
+import HEADERS from "./headers.json";
 
 let paginaErrore:string;
 
-class Dispatcher {
+export class Dispatcher {
     prompt:string = ">>>";
     //  - quando si definisce un json si mette any o object
     //    se non si vuole definire la struttura direttamente
@@ -148,4 +148,4 @@ let init = () => {
 
 // dal main si importa solamente l'istanza
 // di Dispatcher perchè è l'unica che esportiamo
-module.exports = new Dispatcher();
+// module.exports = new Dispatcher();
