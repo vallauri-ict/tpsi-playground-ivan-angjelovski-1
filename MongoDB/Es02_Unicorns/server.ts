@@ -295,3 +295,46 @@ mongoClient.connect(CONNECTIONSTRING, function (err, client) {
         console.error("Errore nella connessione al database: " + err.message);
     }
 });
+
+// query 14
+mongoClient.connect(CONNECTIONSTRING, function (err, client) {
+    if (!err) {
+        let db = client.db(DBNAME);
+        let collection = db.collection("Unicorns");
+        collection.distinct("loves", {"gender": "f"}, (err, data) => {
+            if (!err) {
+                console.log("QUERY 14: ", data);
+            } else {
+                console.error("Errore esecuzione query: " + err.message);
+            }
+            client.close();
+        });
+    } else {
+        console.error("Errore nella connessione al database: " + err.message);
+    }
+});
+
+// query 15
+mongoClient.connect(CONNECTIONSTRING, function (err, client) {
+    if (!err) {
+        let db = client.db(DBNAME);
+        let collection = db.collection("Unicorns");
+        collection.insertOne({"name": "pippo", "gender": "m", "loves": ["apple", "lemon"]}, (err, data) => {
+            if (!err) {
+                console.log("QUERY 15: ", data);
+                collection.deleteMany({"name": "pippo"}, (err, data) => {
+                    if (!err) {
+                        console.log("QUERY 15 B: ", data);
+                    } else {
+                        console.error("Errore esecuzione query: " + err.message);
+                    }
+                });
+            } else {
+                console.error("Errore esecuzione query: " + err.message);
+            }
+            client.close();
+        });
+    } else {
+        console.error("Errore nella connessione al database: " + err.message);
+    }
+});
