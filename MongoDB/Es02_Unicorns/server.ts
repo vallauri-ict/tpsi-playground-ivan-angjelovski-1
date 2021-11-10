@@ -32,6 +32,30 @@ mongoClient.connect(CONNECTIONSTRING, function (err, client) {
     }
 });
 
+// query 1 b
+mongoClient.connect(CONNECTIONSTRING, function (err, client) {
+    if (!err) {
+        let db = client.db(DBNAME);
+        let collection = db.collection(COLLECTION);
+
+        let request = collection.find({ "weight": { "$lte": 800, "$gte": 700 } }).toArray();
+
+        request.then((data) => {
+            console.log("QUERY 1 B: ", data);
+        });
+
+        request.catch((err) => {
+            console.error("Errore esecuzione query: " + err.message);
+        });
+
+        request.finally(() => {
+            client.close();
+        });
+    } else {
+        console.error("Errore nella connessione al database: " + err.message);
+    }
+});
+
 // query 2
 mongoClient.connect(CONNECTIONSTRING, function (err, client) {
     if (!err) {
