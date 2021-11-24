@@ -105,6 +105,8 @@ mongoClient.connect(CONNECTIONSTRING, function (err, client) {
     if (!err) {
         let db = client.db(DBNAME);
         let collection = db.collection(COLLECTION);
+        // ad in gli passo un vettore e i valori che gli passo controlla
+        // che siano presenti all'interno del campo indicato, in questo caso loves
         collection.find({ "$and": [{ "loves": { "$in": ["apple", "grape"] } }, { "vampires": { "$gte": 60 } }] }).toArray((err, data) => {
             if (!err) {
                 console.log("QUERY 4: ", data);
@@ -123,6 +125,11 @@ mongoClient.connect(CONNECTIONSTRING, function (err, client) {
     if (!err) {
         let db = client.db(DBNAME);
         let collection = db.collection(COLLECTION);
+        // all controlla che tutti i valori che passo devono essere
+        // contenuti all'interno di loves
+
+        // a differenza del vettore statico, i valori qui non devono
+        // essere nello stesso ordine
         collection.find({ "loves": { "$all": ["watermelon", "grape"] } }).toArray((err, data) => {
             if (!err) {
                 console.log("QUERY 5: ", data);
