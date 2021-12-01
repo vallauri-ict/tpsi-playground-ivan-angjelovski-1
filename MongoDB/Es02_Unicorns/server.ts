@@ -10,7 +10,10 @@ const mongoClient = mongodb.MongoClient;
 
 const dispatcher: Dispatcher = new Dispatcher();
 
-const CONNECTIONSTRING = "mongodb://127.0.0.1:27017";
+// const CONNECTIONSTRING = "mongodb://127.0.0.1:27017";
+
+// accesso su atlas
+const CONNECTIONSTRING = "mongodb+srv://admin:admin@cluster0.jit30.mongodb.net/5B?retryWrites=true&w=majority";
 const DBNAME = "5B";
 const COLLECTION = "Unicorns";
 
