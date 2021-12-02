@@ -3,6 +3,12 @@ import * as http from "http";
 import * as fs from "fs";
 import * as body_parser from "body-parser";
 import HEADERS from "./headers.json";
+import * as mongodb from "mongodb";
+
+// munga
+const mongo_client = mongodb.MongoClient;
+const CONNECTIONSTRING = "mongodb+srv://admin:admin@cluster0.jit30.mongodb.net/5B?retryWrites=true&w=majority";
+const DBNAME = "5B";
 
 const PORT:number = 1337;
 let app = express();
@@ -68,21 +74,71 @@ app.use("/", (req, res, next) => {
 
 
 
-   
-
-
 
 /* ******************************************************************
                elenco delle route di risposta al client
    ****************************************************************** */
-app.get("/api/risorsa1", function (req, res, next) {
-    let nome = req.query.nome;
-    res.send({"nome": nome});
+app.use("/", (req, res, next) => {
+    mongo_client.connect(CONNECTIONSTRING, (err, client) => {
+        if (err) {
+            res.status(503).send("Errore di connessione al database");
+        } else {
+            console.log(">>>>>> CONNESSIONE ESEGUITA CORRETTAMENTE");
+            req["client"] = client;
+            next();
+        }
+    });
 });
 
-app.post("/api/risorsa1", function (req, res, next) {
-    let nome = req.body.nome;
-    res.send({"nome": nome});
+app.get("/api/risorsa1", function (req, res, next) {
+    let unicorn = req.query.name;
+    if (unicorn) {
+        let db = req["client"].db(DBNAME) as mongodb.Db;
+        let collection = db.collection("Unicorns");
+
+        let request = collection.find({"name": unicorn}).toArray();
+
+        request.then((data) => {
+            res.send(data);
+        });
+
+        request.catch((err) => {
+            res.status(503).send("Errore nella query");
+        });
+
+        request.finally(() => {
+            req["client"].close();
+        });
+    } else {
+        res.status(400).send("Parametro mancante: nome unicorno");
+        req["client"].close();
+    };
+});
+
+app.patch("/api/risorsa1", function (req, res, next) {
+    let unicorn = req.body.name;
+    let incVampires = req.body.vampires;
+    if (unicorn && incVampires) {
+        let db = req["client"].db(DBNAME) as mongodb.Db;
+        let collection = db.collection("Unicorns");
+
+        let request = collection.updateOne({"name": unicorn}, {"$inc": {"vampires": incVampires}});
+
+        request.then((data) => {
+            res.send(data);
+        });
+
+        request.catch((err) => {
+            res.status(503).send("Errore nella query");
+        });
+
+        request.finally(() => {
+            req["client"].close();
+        });
+    } else {
+        res.status(400).send("Parametro mancante: nome unicorno o incremento vampiri");
+        req["client"].close();
+    };
 });
 
 
