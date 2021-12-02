@@ -83,7 +83,7 @@ app.use("/", (req, res, next) => {
         if (err) {
             res.status(503).send("Errore di connessione al database");
         } else {
-            console.log(">>>>>> CONNESSIONE ESEGUITA CORRETTAMENTE");
+            console.log(" >>>>>> CONNESSIONE DB ESEGUITA CORRETTAMENTE");
             req["client"] = client;
             next();
         }
@@ -115,7 +115,7 @@ app.get("/api/risorsa1", function (req, res, next) {
     };
 });
 
-app.patch("/api/risorsa1", function (req, res, next) {
+app.patch("/api/risorsa2", function (req, res, next) {
     let unicorn = req.body.name;
     let incVampires = req.body.vampires;
     if (unicorn && incVampires) {
@@ -141,6 +141,32 @@ app.patch("/api/risorsa1", function (req, res, next) {
     };
 });
 
+app.get("/api/risorsa3/:gender/:hair", function (req, res, next) {
+    let gender = req.params.gender;
+    let hair = req.params.hair;
+
+    // in questo caso non faccio più la if
+    // sull'esistenza dei parametri, perchè se
+    // mancano i parametri non entra nella route
+
+    let db = req["client"].db(DBNAME) as mongodb.Db;
+    let collection = db.collection("Unicorns");
+
+    let request = collection.find({"$and": [{"gender": gender}, {"hair": hair}]}).toArray();
+
+    request.then((data) => {
+        res.send(data);
+    });
+
+    request.catch((err) => {
+        res.status(503).send("Errore nella query");
+    });
+
+    request.finally(() => {
+        req["client"].close();
+    });
+});
+
 
 
 
@@ -154,8 +180,24 @@ app.patch("/api/risorsa1", function (req, res, next) {
 app.use("/", (req, res, next) => {
     res.status(404);
     if(req.originalUrl.startsWith("/api/")) {
-        res.send("Risorsa non trovato");
+        res.send("Risorsa non trovata");
     } else {
         res.send(pagina_errore);
     };
+});
+
+
+
+
+
+
+
+
+
+
+/* ******************************************************************
+                    route di gestione degli errori
+   ****************************************************************** */
+app.use((err, req, res, next) => {
+    console.log("Errore codice server: " + err.message);
 });
