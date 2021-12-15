@@ -116,6 +116,7 @@ app.get("/api/getCollections", function (req, res, next) {
 let currentCollection = "";
 let id = "";
 
+// il ? rende un parametro facoltativo
 app.use("/api/:collection/:id?", function (req, res, next) {
     currentCollection = req.params.collection;
     id = req.params.id;
