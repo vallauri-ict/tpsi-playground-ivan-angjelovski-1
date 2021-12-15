@@ -77,6 +77,7 @@ app.use("/", (req, res, next) => {
 /* ******************************************************************
                elenco delle route di risposta al client
    ****************************************************************** */
+// middleware di apertura della connessione
 app.use("/", (req, res, next) => {
     mongo_client.connect(CONNECTIONSTRING, (err, client) => {
         if (err) {
@@ -89,69 +90,13 @@ app.use("/", (req, res, next) => {
     });
 });
 
-app.get("/api/risorsa1", function (req, res, next) {
-    let unicorn = req.query.name;
-    if (unicorn) {
-        let db = req["client"].db(DBNAME) as mongodb.Db;
-        let collection = db.collection("Unicorns");
-
-        let request = collection.find({"name": unicorn}).toArray();
-
-        request.then((data) => {
-            res.send(data);
-        });
-
-        request.catch((err) => {
-            res.status(503).send("Errore nella query");
-        });
-
-        request.finally(() => {
-            req["client"].close();
-        });
-    } else {
-        res.status(400).send("Parametro mancante: nome unicorno");
-        req["client"].close();
-    };
-});
-
-app.patch("/api/risorsa2", function (req, res, next) {
-    let unicorn = req.body.name;
-    let incVampires = req.body.vampires;
-    if (unicorn && incVampires) {
-        let db = req["client"].db(DBNAME) as mongodb.Db;
-        let collection = db.collection("Unicorns");
-
-        let request = collection.updateOne({"name": unicorn}, {"$inc": {"vampires": incVampires}});
-
-        request.then((data) => {
-            res.send(data);
-        });
-
-        request.catch((err) => {
-            res.status(503).send("Errore nella query");
-        });
-
-        request.finally(() => {
-            req["client"].close();
-        });
-    } else {
-        res.status(400).send("Parametro mancante: nome unicorno o incremento vampiri");
-        req["client"].close();
-    };
-});
-
-app.get("/api/risorsa3/:gender/:hair", function (req, res, next) {
-    let gender = req.params.gender;
-    let hair = req.params.hair;
-
-    // in questo caso non faccio più la if
-    // sull'esistenza dei parametri, perchè se
-    // mancano i parametri non entra nella route
-
+// lettura delle collezioni presenti nel db
+app.get("/api/getCollections", function (req, res, next) {
+    // in req["client"] salviamo il client per le connessioni successive 
+    // l' oggetto che gestisce la connessione con mongo
     let db = req["client"].db(DBNAME) as mongodb.Db;
-    let collection = db.collection("Unicorns");
 
-    let request = collection.find({"$and": [{"gender": gender}, {"hair": hair}]}).toArray();
+    let request = db.listCollections().toArray();
 
     request.then((data) => {
         res.send(data);
@@ -167,6 +112,46 @@ app.get("/api/risorsa3/:gender/:hair", function (req, res, next) {
 });
 
 
+// middleware di intercettazione dei parametri
+let currentCollection = "";
+let id = "";
+
+app.use("/api/:collection/:id?", function (req, res, next) {
+    currentCollection = req.params.collection;
+    id = req.params.id;
+    next();
+});
+
+// [[[Listeners specifici]]]:
+app.get("/api/*", function (req, res, next) {
+    // in ascolto di qualsiasi richiesta get
+    
+    let db = req["client"].db(DBNAME) as mongodb.Db;
+    let collection = db.collection(currentCollection);
+    
+    let request;
+    if (!id) {
+        request = collection.find().toArray();
+    } else {
+        // va fatto solo nella else in quanto
+        // altrimenti, non esistendo id, darebbe
+        // errore
+        let obj_id = new mongodb.ObjectId(id);
+        request = collection.find({"_id": obj_id}).toArray();
+    };
+
+    request.then((data) => {
+        res.send(data);
+    });
+
+    request.catch((err) => {
+        res.status(503).send("Errore nella query");
+    });
+
+    request.finally(() => {
+        req["client"].close();
+    });
+});
 
 
 
