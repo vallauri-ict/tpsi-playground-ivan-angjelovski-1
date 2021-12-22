@@ -138,8 +138,66 @@ app.get("/api/*", function (req, res, next) {
         // altrimenti, non esistendo id, darebbe
         // errore
         let obj_id = new mongodb.ObjectId(id);
-        request = collection.find({"_id": obj_id}).toArray();
+        request = collection.findOne({"_id": obj_id});
     };
+
+    request.then((data) => {
+        res.send(data);
+    });
+
+    request.catch((err) => {
+        res.status(503).send("Errore nella query");
+    });
+
+    request.finally(() => {
+        req["client"].close();
+    });
+});
+
+app.post("/api/*",function(req,res,next){
+    let db = req["client"].db(DBNAME);
+    let collection = db.collection(currentCollection);
+ 
+    let request = collection.insertOne(req["body"]);
+    request.then(function(data){
+        res.send(data);
+    });
+
+    request.catch(function(err){
+        res.status(503).send("Errore esecuzione query");
+    });
+
+    request.finally(function(){
+        req["client"].close();
+    });
+});
+
+app.patch("/api/*",function(req,res,next){
+    let db = req["client"].db(DBNAME);
+    let collection = db.collection(currentCollection);
+ 
+    let obj_id = new mongodb.ObjectId(id);
+
+    let request = collection.updateOne({"_id": obj_id}, {"$set": req["body"]});
+    request.then(function(data){
+        res.send(data);
+    });
+
+    request.catch(function(err){
+        res.status(503).send("Errore esecuzione query");
+    });
+
+    request.finally(function(){
+        req["client"].close();
+    });
+});
+ 
+app.delete("/api/*", function (req, res, next) {
+    let db = req["client"].db(DBNAME) as mongodb.Db;
+    let collection = db.collection(currentCollection);
+    
+    let obj_id = new mongodb.ObjectId(id);
+    let request = collection.deleteOne({"_id": obj_id});
 
     request.then((data) => {
         res.send(data);

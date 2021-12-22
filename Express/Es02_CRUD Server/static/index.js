@@ -57,40 +57,105 @@ $(document).ready(function () {
         td.appendTo(tr);
         td.text(item._id);
         td.prop("id", item._id);
+        td.prop("method", "get");
         td.on("click", visualizzaDettagli);
 
         td = $("<td>");
         td.appendTo(tr);
         td.text(item.name);
         td.prop("id", item._id);
+        td.prop("method", "get");
         td.on("click", visualizzaDettagli);
 
         td = $("<td>");
         td.appendTo(tr);
 
-        for (let i = 0; i < 3; i++) {
-          $("<div>").appendTo(td);
-        }
+        $("<div>").appendTo(td).prop({"_id": item._id, "method": "patch"}).on("click", visualizzaDettagli);
+
+        $("<div>").appendTo(td).prop({"_id": item._id, "method": "put"}).on("click", visualizzaDettagli);
+        
+        $("<div>").appendTo(td).prop("_id", item._id).on("click", elimina);
       }
     });
   });
+
+
+
+  function elimina() {
+    let request = inviaRichiesta("delete", "/api/" + currentCollection + "/" + $(this).prop("_id"));
+    request.fail(errore);
+    request.done((data) => {
+      alert("Documento cancellato correttamente");
+      aggiorna();
+    });
+  }
+
+
+  let aggiorna = () => {
+    let event = jQuery.Event('click');
+    event.target = divCollections.find('input[type=radio]:checked')[0];
+    divCollections.trigger(event);
+  }
 
   function visualizzaDettagli() {
     // attenzione, in questo caso non sarebbe andato
     // fare this con la arrow func, in quanto non avrebbe
     // modificato il this
-    let request = inviaRichiesta("get", "/api/" + currentCollection + "/" + $(this).prop("id"));
+    let method = $(this).prop("method").toUpperCase();
+    let id = $(this).prop("id");
+
+    let request = inviaRichiesta("get", "/api/" + currentCollection + "/" + id);
     request.fail(errore);
     request.done((data) => {
       divDettagli.empty();
-      
+    
       console.log(data);
       let content = "";
-      for (const key in data[0]) {
-        content += "<strong>" + key + ":</strong> " + data[0][key] + "<br>";
+      for (const key in data) {
+        content += "<strong>" + key + ":</strong> " + data[key] + "<br>";
       }
-
       divDettagli.append(content);
+      if (method != "GET") {
+        divDettagli.empty();
+        let txtArea = $("<textarea>");
+        txtArea.val(JSON.stringify(data));
+        txtArea.appendTo(divDettagli);
+
+        visualizzaPulsanteInvia(method, id);
+      }
     });
   };
+
+  let visualizzaPulsanteInvia = (method, id = "") => {
+    let btnInvia = $("<button>");
+    btnInvia.text("Invia");
+    btnInvia.appendTo(divDettagli);
+    btnInvia.on("click", () => {
+      alert(txtArea.val());
+      let param = "";
+      try {
+        param = JSON.parse(txtArea.val());
+      } catch {
+        alert("Json non valido");
+        return;
+      }
+
+      let request = inviaRichiesta(method, "/api/" + currentCollection + "/" + id, param);
+      request.fail(errore);
+      request.done(() => {
+        alert("operazione avvenuto correttamente");
+        divDettagli.empty();
+        aggiorna();
+      });
+    });
+  };
+
+  $("#btnAdd").on("click", () => {
+    divDettagli.empty();
+    let txtArea = $("<textarea>");
+    txtArea.val("{ }");
+    txtArea.appendTo(divDettagli);
+
+    visualizzaPulsanteInvia("post");
+  });
 });
