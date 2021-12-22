@@ -56,14 +56,14 @@ $(document).ready(function () {
         let td = $("<td>");
         td.appendTo(tr);
         td.text(item._id);
-        td.prop("id", item._id);
+        td.prop("_id", item._id);
         td.prop("method", "get");
         td.on("click", visualizzaDettagli);
 
         td = $("<td>");
         td.appendTo(tr);
         td.text(item.name);
-        td.prop("id", item._id);
+        td.prop("_id", item._id);
         td.prop("method", "get");
         td.on("click", visualizzaDettagli);
 
@@ -102,7 +102,7 @@ $(document).ready(function () {
     // fare this con la arrow func, in quanto non avrebbe
     // modificato il this
     let method = $(this).prop("method").toUpperCase();
-    let id = $(this).prop("id");
+    let id = $(this).prop("_id");
 
     let request = inviaRichiesta("get", "/api/" + currentCollection + "/" + id);
     request.fail(errore);
@@ -118,7 +118,8 @@ $(document).ready(function () {
       if (method != "GET") {
         divDettagli.empty();
         let txtArea = $("<textarea>");
-        txtArea.val(JSON.stringify(data));
+        delete data._id;
+        txtArea.val(JSON.stringify(data, null, 2));
         txtArea.appendTo(divDettagli);
 
         visualizzaPulsanteInvia(method, id);

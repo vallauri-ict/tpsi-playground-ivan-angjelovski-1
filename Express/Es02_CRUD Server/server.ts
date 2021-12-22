@@ -191,6 +191,26 @@ app.patch("/api/*",function(req,res,next){
         req["client"].close();
     });
 });
+
+app.put("/api/*",function(req,res,next){
+    let db = req["client"].db(DBNAME);
+    let collection = db.collection(currentCollection);
+ 
+    let obj_id = new mongodb.ObjectId(id);
+
+    let request = collection.replaceOne({"_id": obj_id}, {"$set": req["body"]});
+    request.then(function(data){
+        res.send(data);
+    });
+
+    request.catch(function(err){
+        res.status(503).send("Errore esecuzione query");
+    });
+
+    request.finally(function(){
+        req["client"].close();
+    });
+});
  
 app.delete("/api/*", function (req, res, next) {
     let db = req["client"].db(DBNAME) as mongodb.Db;
